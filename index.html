@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Application</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('background.png') no-repeat center center fixed;
+      background-size: cover;
+      opacity: 0.3;
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+    }
+    h1 {
+      text-align: center;
+    }
+    input[type=text], input[type=tel], textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    label {
+      margin-top: 10px;
+      display: block;
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 16px;
+      margin-top: 10px;
+      margin-right: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #submitBtn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    #downloadBtn {
+      background-color: #008CBA;
+      color: white;
+      display: none;
+    }
+    #adminLoginBtn {
+      background-color: #f0ad4e;
+      color: white;
+    }
+    #langToggle {
+      background-color: #e7e7e7;
+      color: #000;
+    }
+    .lang-toggle {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+<div class="background"></div>
+
+<div class="container">
+  <div class="lang-toggle">
+    <button type="button" id="langToggle">မြန်မာ</button>
+  </div>
+  <h1 id="formTitle">Job Application Form</h1>
+  <form id="applicationForm">
+    <input type="text" id="name" name="name" placeholder="Name" required>
+    <input type="tel" id="phone" name="phone" placeholder="Phone" required>
+    <textarea id="motivation" name="motivation" placeholder="Motivation" rows="4"></textarea>
+    <label id="labelExperience" for="experience">Experience</label>
+    <select id="experience" name="experience">
+      <option value="" disabled selected>-- Select --</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    <button type="submit" id="submitBtn">Submit Application</button>
+  </form>
+  <button type="button" id="adminLoginBtn">Admin Login</button>
+  <button type="button" id="downloadBtn">Download CSV</button>
+</div>
+
+<script>
+const translations = {
+  en: {
+    title: "Job Application Form",
+    name: "Name",
+    phone: "Phone",
+    motivation: "Motivation",
+    experience: "Experience",
+    optionSelect: "-- Select --",
+    optionYes: "Yes",
+    optionNo: "No",
+    submit: "Submit Application",
+    download: "Download CSV"
+  },
+  mm: {
+    title: "အလုပ်လျှောက်လွှာပုံစံ",
+    name: "အမည်",
+    phone: "ဖုန်းနံပါတ်",
+    motivation: "လျှောက်လွှာ၏ ရည်ရွယ်ချက်",
+    experience: "အတွေ့အကြုံ",
+    optionSelect: "-- ရွေးချယ်ပါ --",
+    optionYes: "ရှိ",
+    optionNo: "မရှိ",
+    submit: "လျှောက်လွှာ တင်ပြမည်",
+    download: "CSV ဖိုင် ဒေါင်းလုတ်"
+  }
+};
+
+let currentLang = 'en';
+const ADMIN_PASSWORD = "PKmm@2025";
+
+// Language Toggle
+document.getElementById('langToggle').addEventListener('click', function() {
+  currentLang = (currentLang === 'en') ? 'mm' : 'en';
+  const t = translations[currentLang];
+  document.getElementById('langToggle').innerText = (currentLang === 'en') ? 'မြန်မာ' : 'English';
+  document.getElementById('formTitle').innerText = t.title;
+  document.getElementById('name').placeholder = t.name;
+  document.getElementById('phone').placeholder = t.phone;
+  document.getElementById('motivation').placeholder = t.motivation;
+  document.getElementById('labelExperience').innerText = t.experience;
+  const expSelect = document.getElementById('experience');
+  expSelect.options[0].text = t.optionSelect;
+  expSelect.options[1].text = t.optionYes;
+  expSelect.options[2].text = t.optionNo;
+  document.getElementById('submitBtn').innerText = t.submit;
+  document.getElementById('downloadBtn').innerText = t.download;
+});
+
+// Submit Form
+const form = document.getElementById('applicationForm');
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  const application = {
+    name: document.getElementById('name').value,
+    phone: document.getElementById('phone').value,
+    motivation: document.getElementById('motivation').value,
+    experience: document.getElementById('experience').value
+  };
+  const stored = localStorage.getItem('applications');
+  const applications = stored ? JSON.parse(stored) : [];
+  applications.push(application);
+  localStorage.setItem('applications', JSON.stringify(applications));
+  alert("Thank you for your application! | ကျေးဇူးတင်ပါတယ်");
+  form.reset();
+});
+
+// Admin Login
+const adminLoginBtn = document.getElementById('adminLoginBtn');
+adminLoginBtn.addEventListener('click', function() {
+  const inputPassword = prompt("Enter admin password:");
+  if (inputPassword === ADMIN_PASSWORD) {
+    document.getElementById('downloadBtn').style.display = "inline-block";
+    alert("Access granted.");
+  } else {
+    alert("Incorrect password.");
+  }
+});
+
+// Download CSV
+const downloadBtn = document.getElementById('downloadBtn');
+downloadBtn.addEventListener('click', function() {
+  const stored = localStorage.getItem('applications');
+  if (!stored) {
+    alert("No application data to download.");
+    return;
+  }
+  const applications = JSON.parse(stored);
+  if (applications.length === 0) {
+    alert("No application data to download.");
+    return;
+  }
+  let csvContent = "Name,Phone,Motivation,Experience\n";
+  applications.forEach(app => {
+    csvContent += `"${app.name}","${app.phone}","${app.motivation}","${app.experience}"\n`;
+  });
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const downloadLink = document.createElement("a");
+  downloadLink.href = url;
+  downloadLink.download = "applications.csv";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  URL.revokeObjectURL(url);
+});
+</script>
+
+</body>
+</html>
